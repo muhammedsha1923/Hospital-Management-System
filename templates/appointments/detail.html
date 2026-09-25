@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Appointment{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Appointment on {{ a.date|date:"d M Y" }} at {{ a.time|time:"H:i" }}</h1></div>
+  {% if user.role == 'ADMIN' or user.role == 'RECEPTIONIST' %}<a class="btn btn-outline" href="{% url 'appointments:edit' a.pk %}">Update</a>{% endif %}
+</div>
+<div class="card" data-appt data-status="{{ a.status }}">
+  <dl class="details">
+    <dt>Status</dt><dd><span class="badge appt-badge badge-{{ a.status|lower }}">{{ a.get_status_display }}</span></dd>
+    <dt>Patient</dt><dd>{% if user.role != 'PATIENT' %}<a href="{% url 'patients:detail' a.patient_id %}">{{ a.patient.full_name }}</a> ({{ a.patient.patient_id }}){% else %}{{ a.patient.full_name }}{% endif %}</dd>
+    <dt>Doctor</dt><dd><a href="{% url 'doctors:detail' a.doctor_id %}">{{ a.doctor.full_name }}</a> — {{ a.doctor.specialization }}</dd>
+    <dt>Department</dt><dd>{{ a.department.name }}</dd>
+    <dt>Duration</dt><dd>{{ a.duration_minutes }} minutes</dd>
+    <dt>Reason for visit</dt><dd>{{ a.reason }}</dd>
+    {% if a.notes %}<dt>Notes</dt><dd>{{ a.notes }}</dd>{% endif %}
+    <dt>Booked</dt><dd>{{ a.created_at|date:"d M Y H:i" }}</dd>
+  </dl>
+  <hr style="border:0;border-top:1px solid var(--line);margin:1rem 0">
+  {% include 'appointments/_actions_box.html' %}
+</div>
+<a class="btn btn-ghost" href="{% url 'appointments:list' %}">Back to appointments</a>
+{% endblock %}

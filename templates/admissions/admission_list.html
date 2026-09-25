@@ -1,0 +1,21 @@
+{% extends 'base.html' %}{% block title %}Admissions{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Admissions</h1></div>{% if user.role == 'ADMIN' or user.role == 'RECEPTIONIST' %}<a class="btn" href="{% url 'admissions:admit' %}">Admit patient</a>{% endif %}</div>
+<div class="card">
+  <form class="filters" method="get">
+    <select class="form-control" name="status" aria-label="Filter by status"><option value="">All admissions</option>{% for v, l in statuses %}<option value="{{ v }}" {% if status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+    <button class="btn btn-outline">Apply</button>
+  </form>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Patient</th><th>Room / bed</th><th>Doctor</th><th>Admitted</th><th>Status</th><th class="num">Room charge</th><th></th></tr></thead><tbody>
+    {% for a in admissions %}
+      <tr><td>{% if user.role != 'PATIENT' %}<a href="{% url 'patients:detail' a.patient_id %}">{{ a.patient.full_name }}</a>{% else %}{{ a.patient.full_name }}{% endif %}<div class="muted small">{{ a.reason|truncatechars:40 }}</div></td>
+        <td>{{ a.bed }}</td><td>{{ a.attending_doctor.full_name }}</td>
+        <td class="nowrap">{{ a.admitted_at|date:"d M Y H:i" }}{% if a.discharged_at %}<div class="muted small">Discharged {{ a.discharged_at|date:"d M Y H:i" }}</div>{% endif %}</td>
+        <td><span class="badge badge-{{ a.status|lower }}">{{ a.get_status_display }}</span></td>
+        <td class="num">{{ a.room_charge }}<div class="muted small">{{ a.nights }} night{{ a.nights|pluralize }}</div></td>
+        <td class="right">{% if a.status == 'ADMITTED' and user.role != 'PATIENT' %}<form method="post" action="{% url 'admissions:discharge' a.pk %}" class="inline" data-confirm="Discharge {{ a.patient.full_name }}? Room charges will be added to their invoice.">{% csrf_token %}<button class="btn btn-xs btn-outline">Discharge</button></form>{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="7" class="empty">No admissions to show.</td></tr>{% endfor %}
+  </tbody></table></div>
+</div>
+{% endblock %}

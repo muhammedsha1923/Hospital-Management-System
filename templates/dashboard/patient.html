@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% block title %}My health{% endblock %}
+{% block content %}
+{% if not patient %}<div class="card empty">Your account isn't linked to a patient record yet. Please contact reception.</div>{% else %}
+<div class="page-head"><div><h1>Hello, {{ patient.first_name }}</h1><p class="muted">Patient ID {{ patient.patient_id }}</p></div>
+  <div class="quick"><a class="btn" href="{% url 'appointments:create' %}">Book appointment</a><a class="btn btn-outline" href="{% url 'doctors:list' %}">Find a doctor</a></div></div>
+{% if admission %}<div class="alert alert-info"><span>You are currently admitted to {{ admission.bed }}.</span></div>{% endif %}
+<div class="grid grid-3" style="margin-bottom:1.25rem">
+  <div class="stat"><div class="value">{{ upcoming|length }}</div><div class="label">Upcoming appointments</div></div>
+  <div class="stat {% if unpaid_count %}warn{% else %}good{% endif %}"><div class="value">{{ unpaid_total }}</div><div class="label">Outstanding bills</div><div class="hint">{{ unpaid_count }} open invoice{{ unpaid_count|pluralize }}</div></div>
+  <div class="stat"><div class="value">{{ records_count }}</div><div class="label">Medical records</div>{% if follow_up %}<div class="hint">Next follow-up {{ follow_up.follow_up_date|date:"d M Y" }}</div>{% endif %}</div>
+</div>
+<div class="card"><div class="card-head"><h2>Upcoming appointments</h2><a href="{% url 'appointments:list' %}">History</a></div>{% include 'appointments/_table.html' with rows=upcoming show_date=True empty_text="No upcoming appointments. Book one whenever you need." %}</div>
+<div class="card"><div class="card-head"><h2>Recent prescriptions</h2><a href="{% url 'records:mine' %}">All records</a></div>
+  {% for p in prescriptions %}<p><strong>{{ p.medication }}</strong> {{ p.dosage }} — {{ p.frequency }}{% if p.duration %}, {{ p.duration }}{% endif %}</p>{% empty %}<p class="muted">No prescriptions yet.</p>{% endfor %}</div>
+{% endif %}
+{% endblock %}

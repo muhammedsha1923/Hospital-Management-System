@@ -1,0 +1,15 @@
+{% extends 'base.html' %}{% block title %}Patient registration{% endblock %}
+{% block auth %}
+<div class="auth-card wide" style="margin:auto">
+  <div class="brand"><span class="brand-mark">+</span> CarePoint Hospital</div>
+  <h1>Create a patient account</h1>
+  <p class="muted">Book appointments and view your records, prescriptions and bills online.</p>
+  <form method="post">
+    {% csrf_token %}
+    {% include 'partials/_form_errors.html' %}
+    <div class="form-row">{% for field in form %}{% include 'partials/_field.html' %}{% endfor %}</div>
+    <button class="btn" type="submit">Create account</button>
+    <a class="btn btn-ghost" href="{% url 'accounts:login' %}">I already have an account</a>
+  </form>
+</div>
+{% endblock %}

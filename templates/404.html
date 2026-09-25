@@ -1,0 +1,3 @@
+{% extends 'base.html' %}{% block title %}Not found{% endblock %}
+{% block content %}{% include 'partials/_error.html' with heading="Page not found" text="The page or record doesn't exist, or you don't have permission to see it." %}{% endblock %}
+{% block auth %}{% include 'partials/_error.html' with heading="Page not found" text="The page you asked for doesn't exist." %}{% endblock %}

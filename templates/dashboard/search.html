@@ -1,0 +1,13 @@
+{% extends 'base.html' %}{% block title %}Search{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Search</h1></div>
+<div class="card"><form class="filters" method="get"><input class="form-control grow" name="q" value="{{ q }}" placeholder="Name, patient ID, phone, specialization…" aria-label="Search" autofocus><button class="btn">Search</button></form></div>
+{% if q %}
+<div class="card"><h2>Patients ({{ patients|length }})</h2>
+  <div class="table-wrap"><table><tbody>{% for p in patients %}<tr><td><a href="{% url 'patients:detail' p.pk %}">{{ p.full_name }}</a></td><td>{{ p.patient_id }}</td><td>{{ p.phone }}</td><td class="right"><a class="btn btn-xs btn-outline" href="{% url 'appointments:create' %}?patient={{ p.pk }}">Book</a></td></tr>
+  {% empty %}<tr><td class="empty">No patients match “{{ q }}”.</td></tr>{% endfor %}</tbody></table></div></div>
+<div class="card"><h2>Doctors ({{ doctors|length }})</h2>
+  <div class="table-wrap"><table><tbody>{% for d in doctors %}<tr><td><a href="{% url 'doctors:detail' d.pk %}">{{ d.full_name }}</a></td><td>{{ d.specialization }}</td><td>{{ d.department.name }}</td><td class="right"><a class="btn btn-xs btn-outline" href="{% url 'appointments:create' %}?doctor={{ d.pk }}">Book</a></td></tr>
+  {% empty %}<tr><td class="empty">No doctors match “{{ q }}”.</td></tr>{% endfor %}</tbody></table></div></div>
+{% endif %}
+{% endblock %}

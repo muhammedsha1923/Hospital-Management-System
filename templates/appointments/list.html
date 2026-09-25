@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Appointments{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>{% if user.role == 'DOCTOR' %}My appointments{% elif user.role == 'PATIENT' %}My appointments{% else %}Appointments{% endif %}</h1></div>
+  {% if user.role != 'DOCTOR' %}<a class="btn" href="{% url 'appointments:create' %}">{% if user.role == 'PATIENT' %}Request appointment{% else %}Schedule appointment{% endif %}</a>{% endif %}
+</div>
+<div class="card">
+  <form class="filters" method="get">
+    <input class="form-control grow" name="q" value="{{ q }}" placeholder="Search by patient, ID or doctor" aria-label="Search appointments" {% if user.role == 'PATIENT' %}hidden{% endif %}>
+    <select class="form-control" name="status" aria-label="Filter by status"><option value="">All statuses</option>{% for v, l in statuses %}<option value="{{ v }}" {% if status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+    <input class="form-control" type="date" name="date" value="{{ date }}" aria-label="Filter by date">
+    <button class="btn btn-outline">Apply</button>
+    {% if q or status or date %}<a class="btn btn-ghost" href="{% url 'appointments:list' %}">Clear</a>{% endif %}
+  </form>
+  {% include 'appointments/_table.html' with rows=page.object_list show_date=True %}
+  {% include 'partials/_pagination.html' %}
+</div>
+{% endblock %}

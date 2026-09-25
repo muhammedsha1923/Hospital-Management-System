@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% block title %}Sign in{% endblock %}
+{% block auth %}
+<div class="auth-card" style="margin:auto">
+  <div class="brand"><span class="brand-mark">+</span> CarePoint Hospital</div>
+  <h1>Sign in</h1>
+  <p class="muted">Staff and patients sign in here.</p>
+  <form method="post">
+    {% csrf_token %}
+    {% include 'partials/_form_errors.html' %}
+    {% for field in form %}{% include 'partials/_field.html' %}{% endfor %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="btn" type="submit" style="width:100%;justify-content:center">Sign in</button>
+  </form>
+  <p class="small muted" style="margin-top:1rem">New patient? <a href="{% url 'accounts:register' %}">Create an account</a></p>
+</div>
+{% endblock %}

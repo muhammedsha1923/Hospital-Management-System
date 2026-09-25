@@ -1,0 +1,19 @@
+{% extends 'base.html' %}{% block title %}{{ doctor.full_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{{ doctor.full_name }}</h1><p class="muted">{{ doctor.specialization }} · {{ doctor.department.name }}</p></div>
+  <div class="actions">
+    {% if user.role != 'DOCTOR' and doctor.is_available %}<a class="btn" href="{% url 'appointments:create' %}?doctor={{ doctor.pk }}">Book appointment</a>{% endif %}
+    {% if user.role == 'ADMIN' %}<a class="btn btn-outline" href="{% url 'doctors:edit' doctor.pk %}">Edit</a>
+    <form method="post" action="{% url 'doctors:delete' doctor.pk %}" class="inline" data-confirm="Delete {{ doctor.full_name }} and their login account? This cannot be undone.">{% csrf_token %}<button class="btn btn-danger">Delete</button></form>{% endif %}
+  </div></div>
+<div class="card"><dl class="details">
+  <dt>Qualification</dt><dd>{{ doctor.qualification|default:"—" }}</dd>
+  <dt>Experience</dt><dd>{{ doctor.experience_years }} year{{ doctor.experience_years|pluralize }}</dd>
+  <dt>Consultation fee</dt><dd>{{ doctor.consultation_fee }}</dd>
+  <dt>Working hours</dt><dd>{{ doctor.available_from|time:"H:i" }} – {{ doctor.available_to|time:"H:i" }}</dd>
+  <dt>Availability</dt><dd>{% if doctor.is_available %}Accepting appointments{% else %}Not accepting new appointments{% endif %}</dd>
+  {% if user.role == 'ADMIN' or user.role == 'RECEPTIONIST' %}<dt>Contact</dt><dd>{{ doctor.user.email }} {{ doctor.user.phone }}</dd><dt>Licence no.</dt><dd>{{ doctor.license_number }}</dd>{% endif %}
+  {% if doctor.bio %}<dt>About</dt><dd>{{ doctor.bio }}</dd>{% endif %}
+</dl></div>
+<a class="btn btn-ghost" href="{% url 'doctors:list' %}">Back to doctors</a>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ bill.invoice_number }}</title><link rel="stylesheet" href="{% static 'css/style.css' %}"></head>
+<body style="background:#fff"><div style="max-width:800px;margin:1rem auto;padding:0 1rem">
+<p class="no-print"><button class="btn" data-print>Print</button> <a class="btn btn-ghost" href="{% url 'billing:detail' bill.pk %}">Back</a></p>
+{% include 'billing/_invoice.html' %}
+</div><script src="{% static 'js/app.js' %}"></script></body></html>

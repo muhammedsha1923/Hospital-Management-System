@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{{ title }}</h1>{% if subtitle %}<p class="muted">{{ subtitle }}</p>{% endif %}</div></div>
+<div class="card form-card">
+  <form method="post">
+    {% csrf_token %}
+    {% include 'partials/_form_errors.html' %}
+    <div class="form-row">{% for field in form %}{% include 'partials/_field.html' %}{% endfor %}</div>
+    <div class="form-actions">
+      <button class="btn" type="submit">{{ submit_label|default:"Save" }}</button>
+      {% if cancel_url %}<a class="btn btn-ghost" href="{{ cancel_url }}">Cancel</a>{% endif %}
+    </div>
+  </form>
+</div>
+{% endblock %}

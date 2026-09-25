@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block title %}My account{% endblock %}
+{% block content %}
+<div class="page-head"><h1>My account</h1><a class="btn btn-outline" href="{% url 'accounts:password_change' %}">Change password</a></div>
+<div class="card form-card">
+  <p class="muted">Signed in as <strong>{{ user.username }}</strong> · {{ user.get_role_display }}</p>
+  <form method="post">{% csrf_token %}{% include 'partials/_form_errors.html' %}
+    <div class="form-row">{% for field in form %}{% include 'partials/_field.html' %}{% endfor %}</div>
+    <button class="btn" type="submit">Save changes</button>
+  </form>
+</div>
+{% endblock %}

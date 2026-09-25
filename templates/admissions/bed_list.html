@@ -1,0 +1,20 @@
+{% extends 'base.html' %}{% block title %}Rooms &amp; beds{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Rooms &amp; beds</h1></div>{% if user.role == 'ADMIN' %}<a class="btn" href="{% url 'admissions:bed_create' %}">Add room / bed</a>{% endif %}</div>
+<div class="card">
+  <div class="filters"><input class="form-control grow" placeholder="Filter beds" aria-label="Filter beds" data-filter-table="#bed-table">
+    <select class="form-control" aria-label="Filter by availability" data-filter-table="#bed-table" data-filter-attr="state"><option value="">All beds</option><option value="free">Free</option><option value="occupied">Occupied</option><option value="inactive">Out of service</option></select></div>
+  <div class="table-wrap"><table id="bed-table">
+    <thead><tr><th>Room</th><th>Bed</th><th>Type</th><th>Department</th><th class="num">Daily rate</th><th>State</th>{% if user.role == 'ADMIN' %}<th></th>{% endif %}</tr></thead><tbody>
+    {% for b in beds %}
+      <tr data-search="{{ b.room_number|lower }} {{ b.get_bed_type_display|lower }} {{ b.department.name|lower }}" data-state="{% if not b.is_active %}inactive{% elif b.occupant %}occupied{% else %}free{% endif %}">
+        <td>{{ b.room_number }}</td><td>{{ b.bed_number }}</td><td>{{ b.get_bed_type_display }}</td><td>{{ b.department.name|default:"—" }}</td><td class="num">{{ b.daily_rate }}</td>
+        <td>{% if not b.is_active %}<span class="badge badge-cancelled">Out of service</span>{% elif b.occupant %}<span class="badge badge-pending">Occupied</span> <span class="muted small">{{ b.occupant.patient.full_name }}</span>{% else %}<span class="badge badge-completed">Free</span>{% endif %}</td>
+        {% if user.role == 'ADMIN' %}<td class="right"><div class="actions" style="justify-content:flex-end"><a class="btn btn-xs btn-outline" href="{% url 'admissions:bed_edit' b.pk %}">Edit</a>
+          <form method="post" action="{% url 'admissions:bed_delete' b.pk %}" class="inline" data-confirm="Delete this bed?">{% csrf_token %}<button class="btn btn-xs btn-danger">Delete</button></form></div></td>{% endif %}
+      </tr>
+    {% empty %}<tr><td colspan="7" class="empty">No beds configured yet.</td></tr>{% endfor %}
+    <tr data-empty-for="#bed-table" hidden><td colspan="7" class="empty">No beds match your filter.</td></tr>
+  </tbody></table></div>
+</div>
+{% endblock %}

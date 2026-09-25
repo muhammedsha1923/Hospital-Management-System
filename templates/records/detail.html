@@ -1,0 +1,17 @@
+{% extends 'base.html' %}{% block title %}Medical record{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Medical record · {{ record.visit_date|date:"d M Y" }}</h1><p class="muted">{{ record.patient.full_name }} ({{ record.patient.patient_id }}) · seen by {{ record.doctor.full_name }}</p></div>
+  <div class="actions">{% if user.role == 'DOCTOR' and record.doctor.user_id == user.id %}<a class="btn btn-outline" href="{% url 'records:edit' record.pk %}">Edit</a>{% endif %}<button class="btn btn-ghost" data-print>Print</button></div></div>
+<div class="card"><dl class="details">
+  <dt>Symptoms</dt><dd>{{ record.symptoms|default:"—" }}</dd>
+  <dt>Diagnosis</dt><dd>{{ record.diagnosis }}</dd>
+  <dt>Treatment</dt><dd>{{ record.treatment|default:"—" }}</dd>
+  <dt>Treatment notes</dt><dd>{{ record.notes|default:"—" }}</dd>
+  <dt>Follow-up</dt><dd>{% if record.follow_up_date %}{{ record.follow_up_date|date:"d M Y" }}{% else %}None scheduled{% endif %}</dd>
+</dl></div>
+<div class="card"><h2>Prescription</h2>
+  <div class="table-wrap"><table><thead><tr><th>Medication</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th>Instructions</th></tr></thead><tbody>
+  {% for p in record.prescriptions.all %}<tr><td>{{ p.medication }}</td><td>{{ p.dosage }}</td><td>{{ p.frequency }}</td><td>{{ p.duration|default:"—" }}</td><td>{{ p.instructions|default:"—" }}</td></tr>
+  {% empty %}<tr><td colspan="5" class="empty">No medication prescribed.</td></tr>{% endfor %}</tbody></table></div></div>
+<a class="btn btn-ghost no-print" href="{% url 'patients:detail' record.patient_id %}">Back to patient</a>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}{% block title %}Records &amp; prescriptions{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Records &amp; prescriptions</h1><p class="muted">Only you and your treating doctors can see these.</p></div></div>
+{% for r in records %}
+<div class="card"><div class="card-head"><h2>{{ r.visit_date|date:"d M Y" }} · {{ r.doctor.full_name }}</h2><a class="btn btn-xs btn-outline" href="{% url 'records:detail' r.pk %}">Full record</a></div>
+  <dl class="details"><dt>Diagnosis</dt><dd>{{ r.diagnosis }}</dd>{% if r.treatment %}<dt>Treatment</dt><dd>{{ r.treatment }}</dd>{% endif %}{% if r.follow_up_date %}<dt>Follow-up</dt><dd>{{ r.follow_up_date|date:"d M Y" }}</dd>{% endif %}</dl>
+  {% if r.prescriptions.all %}<ul class="rx">{% for p in r.prescriptions.all %}<li><strong>{{ p.medication }}</strong> {{ p.dosage }} — {{ p.frequency }}{% if p.duration %}, {{ p.duration }}{% endif %}</li>{% endfor %}</ul>{% endif %}</div>
+{% empty %}<div class="card empty">You have no medical records yet. They appear here after your doctor completes a visit.</div>{% endfor %}
+{% endblock %}

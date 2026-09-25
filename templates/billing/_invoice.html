@@ -1,0 +1,23 @@
+<div class="invoice">
+  <div class="invoice-head">
+    <div><div class="brand" style="color:var(--ink);padding:0"><span class="brand-mark">+</span> CarePoint Hospital</div><div class="muted small">Invoice / Receipt</div></div>
+    <div class="right"><h2 style="margin:0">{{ bill.invoice_number }}</h2><div class="muted small">Issued {{ bill.issued_date|date:"d M Y" }}{% if bill.due_date %} · Due {{ bill.due_date|date:"d M Y" }}{% endif %}</div>
+      <span class="badge badge-{{ bill.status|lower }}">{{ bill.get_status_display }}</span></div>
+  </div>
+  <p><strong>Billed to:</strong> {{ bill.patient.full_name }} ({{ bill.patient.patient_id }})<br><span class="muted small">{{ bill.patient.phone }}{% if bill.patient.address %} · {{ bill.patient.address }}{% endif %}</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Category</th><th>Description</th><th class="num">Qty</th><th class="num">Unit price</th><th class="num">Amount</th></tr></thead><tbody>
+    {% for i in bill.items.all %}<tr><td>{{ i.get_category_display }}</td><td>{{ i.description }}</td><td class="num">{{ i.quantity }}</td><td class="num">{{ i.unit_price }}</td><td class="num">{{ i.total }}</td></tr>{% endfor %}
+  </tbody></table></div>
+  <div class="totals" style="margin-top:1rem">
+    <div><span>Subtotal</span><span>{{ bill.subtotal }}</span></div>
+    {% if bill.discount %}<div><span>Discount</span><span>− {{ bill.discount }}</span></div>{% endif %}
+    <div class="grand"><span>Total</span><span>{{ bill.total }}</span></div>
+    <div><span>Paid</span><span>{{ bill.amount_paid }}</span></div>
+    <div><strong>Balance due</strong><strong>{{ bill.balance }}</strong></div>
+  </div>
+  {% if bill.payments.all %}<h3 style="margin-top:1.5rem">Payments received</h3>
+  <div class="table-wrap"><table><thead><tr><th>Date</th><th>Method</th><th>Reference</th><th class="num">Amount</th></tr></thead><tbody>
+    {% for p in bill.payments.all %}<tr><td>{{ p.paid_on|date:"d M Y" }}</td><td>{{ p.get_method_display }}</td><td>{{ p.reference|default:"—" }}</td><td class="num">{{ p.amount }}</td></tr>{% endfor %}</tbody></table></div>{% endif %}
+  {% if bill.notes %}<p class="muted small" style="margin-top:1rem">{{ bill.notes }}</p>{% endif %}
+</div>

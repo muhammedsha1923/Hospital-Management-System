@@ -1,0 +1,13 @@
+{% if a.checked_in_at %}<span class="badge badge-completed">Checked in {{ a.checked_in_at|time:"H:i" }}</span>{% endif %}
+{% if a.can_checkin %}
+<form method="post" action="{% url 'appointments:checkin' a.pk %}" class="inline js-status-form">{% csrf_token %}<input type="hidden" name="next" value="{{ next_url|default:request.get_full_path }}"><button class="btn btn-xs btn-success">Check in</button></form>
+{% endif %}
+{% for value, label, css in a.actions %}
+<form method="post" action="{% url 'appointments:status' a.pk %}" class="inline js-status-form" {% if value == 'CANCELLED' %}data-confirm="Cancel this appointment?"{% endif %}>{% csrf_token %}<input type="hidden" name="status" value="{{ value }}"><input type="hidden" name="next" value="{{ next_url|default:request.get_full_path }}"><button class="btn btn-xs {{ css }}">{{ label }}</button></form>
+{% endfor %}
+{% if user.role == 'DOCTOR' and a.status == 'SCHEDULED' or user.role == 'DOCTOR' and a.status == 'COMPLETED' %}
+<a class="btn btn-xs btn-outline" href="{% url 'records:create' a.patient_id %}?appointment={{ a.pk }}">Add record</a>
+{% endif %}
+{% if user.role == 'ADMIN' or user.role == 'RECEPTIONIST' %}
+  {% if a.status == 'COMPLETED' %}<a class="btn btn-xs btn-outline" href="{% url 'billing:create' %}?appointment={{ a.pk }}">Create bill</a>{% endif %}
+{% endif %}

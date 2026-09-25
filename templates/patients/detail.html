@@ -1,0 +1,55 @@
+{% extends 'base.html' %}{% block title %}{{ patient.full_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{{ patient.full_name }}</h1><p class="muted">{{ patient.patient_id }} · {{ patient.age }} years · {{ patient.get_gender_display }}{% if patient.blood_group %} · Blood group {{ patient.blood_group }}{% endif %}</p></div>
+  <div class="actions">
+    {% if user.role == 'DOCTOR' %}<a class="btn" href="{% url 'records:create' patient.pk %}">Add record</a>
+    {% else %}<a class="btn" href="{% url 'appointments:create' %}{% if user.role != 'PATIENT' %}?patient={{ patient.pk }}{% endif %}">{% if user.role == 'PATIENT' %}Book appointment{% else %}Schedule appointment{% endif %}</a>{% endif %}
+    {% if user.role == 'ADMIN' or user.role == 'RECEPTIONIST' %}<a class="btn btn-outline" href="{% url 'admissions:admit' %}?patient={{ patient.pk }}">Admit</a><a class="btn btn-outline" href="{% url 'billing:create' %}?patient={{ patient.pk }}">Create bill</a>{% endif %}
+    {% if user.role != 'DOCTOR' %}<a class="btn btn-outline" href="{% url 'patients:edit' patient.pk %}">Edit</a>{% endif %}
+    {% if user.role == 'ADMIN' %}<form method="post" action="{% url 'patients:delete' patient.pk %}" class="inline" data-confirm="Permanently delete {{ patient.full_name }}?">{% csrf_token %}<button class="btn btn-danger">Delete</button></form>{% endif %}
+  </div></div>
+
+<div class="grid grid-2">
+  <div class="card"><h2>Personal details</h2><dl class="details">
+    <dt>Date of birth</dt><dd>{{ patient.date_of_birth|date:"d M Y" }}</dd>
+    <dt>Phone</dt><dd>{{ patient.phone }}</dd><dt>Email</dt><dd>{{ patient.email|default:"—" }}</dd>
+    <dt>Address</dt><dd>{{ patient.address|default:"—" }}</dd>
+    <dt>Portal login</dt><dd>{% if patient.user %}{{ patient.user.username }}{% else %}None{% endif %}</dd>
+  </dl></div>
+  <div class="card"><h2>Emergency contact &amp; alerts</h2><dl class="details">
+    <dt>Contact</dt><dd>{{ patient.emergency_contact_name|default:"—" }}{% if patient.emergency_contact_relation %} ({{ patient.emergency_contact_relation }}){% endif %}</dd>
+    <dt>Contact phone</dt><dd>{{ patient.emergency_contact_phone|default:"—" }}</dd>
+    <dt>Blood group</dt><dd>{{ patient.blood_group|default:"Unknown" }}</dd>
+    <dt>Allergies</dt><dd>{{ patient.allergies|default:"None recorded" }}</dd>
+    {% if clinical %}<dt>Medical history</dt><dd>{{ patient.medical_history|default:"None recorded" }}</dd>{% endif %}
+  </dl></div>
+</div>
+
+<div class="card"><div class="card-head"><h2>Appointments</h2></div>
+  <div class="table-wrap"><table><thead><tr><th>When</th><th>Doctor</th><th>Reason</th><th>Status</th></tr></thead><tbody>
+  {% for a in appointments %}<tr><td class="nowrap"><a href="{% url 'appointments:detail' a.pk %}">{{ a.date|date:"d M Y" }} {{ a.time|time:"H:i" }}</a></td><td>{{ a.doctor.full_name }}</td><td>{{ a.reason|truncatechars:50 }}</td><td><span class="badge badge-{{ a.status|lower }}">{{ a.get_status_display }}</span></td></tr>
+  {% empty %}<tr><td colspan="4" class="empty">No appointments yet.</td></tr>{% endfor %}</tbody></table></div></div>
+
+{% if clinical %}
+<div class="card"><div class="card-head"><h2>Medical records</h2>{% if user.role == 'DOCTOR' %}<a class="btn btn-xs" href="{% url 'records:create' patient.pk %}">Add record</a>{% endif %}</div>
+  {% for r in records %}
+    <div class="record"><strong>{{ r.visit_date|date:"d M Y" }}</strong> · {{ r.doctor.full_name }}
+      <div>{{ r.diagnosis|truncatechars:160 }}</div>
+      {% if r.prescriptions.all %}<div class="muted small">Prescribed: {% for p in r.prescriptions.all %}{{ p.medication }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>{% endif %}
+      {% if r.follow_up_date %}<div class="muted small">Follow-up: {{ r.follow_up_date|date:"d M Y" }}</div>{% endif %}
+      <a class="small" href="{% url 'records:detail' r.pk %}">View full record</a></div>
+  {% empty %}<p class="empty">No medical records yet.</p>{% endfor %}
+</div>
+{% endif %}
+
+<div class="grid grid-2">
+  <div class="card"><h2>Admissions</h2>
+    {% for a in admissions %}<p><span class="badge badge-{{ a.status|lower }}">{{ a.get_status_display }}</span> {{ a.bed }}<br><span class="muted small">{{ a.admitted_at|date:"d M Y" }}{% if a.discharged_at %} → {{ a.discharged_at|date:"d M Y" }}{% endif %} · {{ a.attending_doctor.full_name }}</span></p>
+    {% empty %}<p class="muted">No admissions.</p>{% endfor %}</div>
+  {% if user.role != 'DOCTOR' %}
+  <div class="card"><h2>Bills</h2>
+    {% for b in bills %}<p><a href="{% url 'billing:detail' b.pk %}">{{ b.invoice_number }}</a> · {{ b.total }} <span class="badge badge-{{ b.status|lower }}">{{ b.get_status_display }}</span></p>
+    {% empty %}<p class="muted">No bills.</p>{% endfor %}</div>
+  {% endif %}
+</div>
+{% endblock %}

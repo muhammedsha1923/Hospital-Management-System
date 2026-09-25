@@ -1,0 +1,18 @@
+{% extends 'base.html' %}{% block title %}Doctor dashboard{% endblock %}
+{% block content %}
+{% if not doctor %}<div class="card empty">Your account has no doctor profile yet. Please ask an administrator to set it up.</div>{% else %}
+<div class="page-head"><div><h1>Good day, {{ doctor.full_name }}</h1><p class="muted">{{ doctor.specialization }} · {{ doctor.department.name }}</p></div></div>
+<div class="grid grid-4" style="margin-bottom:1.25rem">
+  <div class="stat"><div class="value">{{ today_appts|length }}</div><div class="label">Appointments today</div></div>
+  <div class="stat warn"><div class="value">{{ pending_requests }}</div><div class="label">Requests awaiting confirmation</div></div>
+  <div class="stat"><div class="value">{{ patient_count }}</div><div class="label">My patients</div></div>
+  <div class="stat good"><div class="value">{{ admitted|length }}</div><div class="label">Admitted under my care</div></div>
+</div>
+<div class="card"><div class="card-head"><h2>Today's schedule</h2></div>{% include 'appointments/_table.html' with rows=today_appts empty_text="No appointments today." %}</div>
+<div class="card"><div class="card-head"><h2>Upcoming</h2><a href="{% url 'appointments:list' %}">All appointments</a></div>{% include 'appointments/_table.html' with rows=upcoming show_date=True empty_text="Nothing booked ahead." %}</div>
+<div class="grid grid-2">
+  <div class="card"><h2>Follow-ups due</h2>{% for r in follow_ups %}<p><a href="{% url 'patients:detail' r.patient_id %}">{{ r.patient.full_name }}</a> <span class="muted small">on {{ r.follow_up_date|date:"d M Y" }}</span></p>{% empty %}<p class="muted">No follow-ups scheduled.</p>{% endfor %}</div>
+  <div class="card"><h2>Admitted patients</h2>{% for a in admitted %}<p><a href="{% url 'patients:detail' a.patient_id %}">{{ a.patient.full_name }}</a> <span class="muted small">{{ a.bed }}</span></p>{% empty %}<p class="muted">No admitted patients.</p>{% endfor %}</div>
+</div>
+{% endif %}
+{% endblock %}

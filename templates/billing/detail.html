@@ -1,0 +1,15 @@
+{% extends 'base.html' %}{% block title %}{{ bill.invoice_number }}{% endblock %}
+{% block content %}
+<div class="page-head no-print"><h1>Invoice {{ bill.invoice_number }}</h1>
+  <div class="actions"><a class="btn btn-outline" href="{% url 'billing:print' bill.pk %}" target="_blank" rel="noopener">Printable version</a>
+    {% if can_manage %}<a class="btn btn-outline" href="{% url 'billing:edit' bill.pk %}">Edit</a>
+    {% if user.role == 'ADMIN' %}<form method="post" action="{% url 'billing:delete' bill.pk %}" class="inline" data-confirm="Delete invoice {{ bill.invoice_number }}?">{% csrf_token %}<button class="btn btn-danger">Delete</button></form>{% endif %}{% endif %}</div></div>
+{% include 'billing/_invoice.html' %}
+{% if payment_form %}
+<div class="card form-card no-print" style="margin-top:1.25rem"><h2>Record a payment</h2>
+  <form method="post" action="{% url 'billing:pay' bill.pk %}">{% csrf_token %}
+    <div class="form-row">{% for field in payment_form %}{% include 'partials/_field.html' %}{% endfor %}</div>
+    <button class="btn btn-success" type="submit">Record payment</button></form></div>
+{% endif %}
+<p class="no-print" style="margin-top:1rem"><a class="btn btn-ghost" href="{% url 'billing:list' %}">Back to bills</a></p>
+{% endblock %}

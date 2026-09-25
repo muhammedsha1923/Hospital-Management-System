@@ -1,0 +1,91 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Dashboard{% endblock %} · CarePoint Hospital</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+{% if user.is_authenticated %}
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">+</span> CarePoint HMS</div>
+    {% with ns=request.resolver_match.namespace %}
+    <nav>
+      <a class="nav-link {% if ns == 'dashboard' %}active{% endif %}" href="{% url 'dashboard:home' %}">Dashboard</a>
+
+      {% if user.role == 'ADMIN' %}
+        <div class="nav-group">Clinical</div>
+        <a class="nav-link {% if ns == 'patients' %}active{% endif %}" href="{% url 'patients:list' %}">Patients</a>
+        <a class="nav-link {% if ns == 'doctors' and request.resolver_match.url_name != 'departments' %}active{% endif %}" href="{% url 'doctors:list' %}">Doctors</a>
+        <a class="nav-link {% if request.resolver_match.url_name == 'departments' %}active{% endif %}" href="{% url 'doctors:departments' %}">Departments</a>
+        <a class="nav-link {% if ns == 'appointments' %}active{% endif %}" href="{% url 'appointments:list' %}">Appointments</a>
+        <div class="nav-group">Facilities</div>
+        <a class="nav-link {% if ns == 'admissions' and request.resolver_match.url_name != 'beds' %}active{% endif %}" href="{% url 'admissions:list' %}">Admissions</a>
+        <a class="nav-link {% if request.resolver_match.url_name == 'beds' %}active{% endif %}" href="{% url 'admissions:beds' %}">Rooms &amp; beds</a>
+        <div class="nav-group">Administration</div>
+        <a class="nav-link {% if ns == 'billing' %}active{% endif %}" href="{% url 'billing:list' %}">Billing</a>
+        <a class="nav-link {% if request.resolver_match.url_name|slice:':4' == 'user' %}active{% endif %}" href="{% url 'accounts:user_list' %}">Users &amp; roles</a>
+
+      {% elif user.role == 'RECEPTIONIST' %}
+        <div class="nav-group">Front desk</div>
+        <a class="nav-link {% if ns == 'patients' %}active{% endif %}" href="{% url 'patients:list' %}">Patients</a>
+        <a class="nav-link {% if ns == 'appointments' %}active{% endif %}" href="{% url 'appointments:list' %}">Appointments</a>
+        <a class="nav-link {% if ns == 'admissions' and request.resolver_match.url_name != 'beds' %}active{% endif %}" href="{% url 'admissions:list' %}">Admissions</a>
+        <a class="nav-link {% if request.resolver_match.url_name == 'beds' %}active{% endif %}" href="{% url 'admissions:beds' %}">Bed availability</a>
+        <a class="nav-link {% if ns == 'doctors' %}active{% endif %}" href="{% url 'doctors:list' %}">Doctors</a>
+        <a class="nav-link {% if ns == 'billing' %}active{% endif %}" href="{% url 'billing:list' %}">Billing</a>
+
+      {% elif user.role == 'DOCTOR' %}
+        <div class="nav-group">My practice</div>
+        <a class="nav-link {% if ns == 'appointments' %}active{% endif %}" href="{% url 'appointments:list' %}">My appointments</a>
+        <a class="nav-link {% if ns == 'patients' or ns == 'records' %}active{% endif %}" href="{% url 'patients:list' %}">My patients</a>
+        <a class="nav-link {% if ns == 'admissions' %}active{% endif %}" href="{% url 'admissions:list' %}">Admitted patients</a>
+        <a class="nav-link {% if ns == 'doctors' %}active{% endif %}" href="{% url 'doctors:list' %}">Doctors</a>
+
+      {% else %}
+        <div class="nav-group">My care</div>
+        <a class="nav-link {% if ns == 'patients' %}active{% endif %}" href="{% url 'patients:me' %}">My profile</a>
+        <a class="nav-link {% if ns == 'appointments' %}active{% endif %}" href="{% url 'appointments:list' %}">Appointments</a>
+        <a class="nav-link {% if ns == 'records' %}active{% endif %}" href="{% url 'records:mine' %}">Records &amp; prescriptions</a>
+        <a class="nav-link {% if ns == 'billing' %}active{% endif %}" href="{% url 'billing:list' %}">Bills</a>
+        <a class="nav-link {% if ns == 'doctors' %}active{% endif %}" href="{% url 'doctors:list' %}">Find a doctor</a>
+        <a class="nav-link {% if ns == 'admissions' %}active{% endif %}" href="{% url 'admissions:list' %}">Admissions</a>
+      {% endif %}
+    </nav>
+    {% endwith %}
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" id="menu-btn" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
+      {% if user.role == 'ADMIN' or user.role == 'RECEPTIONIST' %}
+      <form action="{% url 'dashboard:search' %}" method="get" role="search">
+        <input class="form-control" type="search" name="q" placeholder="Search patients or doctors…" aria-label="Search patients or doctors" style="min-width:220px">
+      </form>
+      {% endif %}
+      <span class="spacer"></span>
+      <div class="user-chip">
+        <a href="{% url 'accounts:profile' %}" class="who">{{ user.display_name }}</a>
+        <span class="role-tag">{{ user.get_role_display }}</span>
+        <form method="post" action="{% url 'accounts:logout' %}" class="inline">{% csrf_token %}<button class="btn btn-ghost btn-xs">Sign out</button></form>
+      </div>
+    </header>
+    {% include 'partials/_messages.html' %}
+    <main class="content" id="main">{% block content %}{% endblock %}</main>
+  </div>
+</div>
+{% else %}
+<div class="auth-wrap">
+  <div style="width:100%;max-width:640px">
+    {% include 'partials/_messages.html' %}
+    {% block auth %}{% endblock %}
+  </div>
+</div>
+{% endif %}
+<script src="{% static 'js/app.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

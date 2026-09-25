@@ -1,0 +1,27 @@
+{% extends 'base.html' %}{% block title %}Doctors{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{% if user.role == 'PATIENT' %}Find a doctor{% else %}Doctors{% endif %}</h1></div>
+  {% if user.role == 'ADMIN' %}<a class="btn" href="{% url 'doctors:create' %}">Add doctor</a>{% endif %}</div>
+<div class="card">
+  <form class="filters" method="get">
+    <input class="form-control grow" name="q" value="{{ q }}" placeholder="Search name or specialization" aria-label="Search doctors" data-filter-table="#doctor-table">
+    <select class="form-control" name="department" aria-label="Filter by department"><option value="">All departments</option>{% for d in departments %}<option value="{{ d.pk }}" {% if dept == d.pk|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>{% endfor %}</select>
+    <button class="btn btn-outline">Apply</button>
+  </form>
+  <div class="table-wrap"><table id="doctor-table">
+    <thead><tr><th>Doctor</th><th>Department</th><th>Working hours</th><th class="num">Fee</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for d in doctors %}
+      <tr data-search="{{ d.full_name|lower }} {{ d.specialization|lower }} {{ d.department.name|lower }}">
+        <td><a href="{% url 'doctors:detail' d.pk %}">{{ d.full_name }}</a><div class="muted small">{{ d.specialization }}</div></td>
+        <td>{{ d.department.name }}</td>
+        <td class="nowrap">{{ d.available_from|time:"H:i" }} – {{ d.available_to|time:"H:i" }}</td>
+        <td class="num">{{ d.consultation_fee }}</td>
+        <td>{% if d.is_available %}<span class="badge badge-completed">Available</span>{% else %}<span class="badge badge-cancelled">Unavailable</span>{% endif %}</td>
+        <td class="right">{% if user.role != 'DOCTOR' and d.is_available %}<a class="btn btn-xs btn-outline" href="{% url 'appointments:create' %}?doctor={{ d.pk }}">Book</a>{% endif %}</td>
+      </tr>
+    {% empty %}<tr><td colspan="6" class="empty">No doctors match your search.</td></tr>{% endfor %}
+    <tr data-empty-for="#doctor-table" hidden><td colspan="6" class="empty">No doctors match your search.</td></tr>
+    </tbody></table></div>
+</div>
+{% endblock %}

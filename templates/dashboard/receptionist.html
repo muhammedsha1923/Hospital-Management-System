@@ -1,0 +1,13 @@
+{% extends 'base.html' %}{% block title %}Reception dashboard{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Front desk</h1><p class="muted">Today's arrivals and pending requests.</p></div>
+  <div class="quick"><a class="btn" href="{% url 'patients:create' %}">Register patient</a><a class="btn btn-outline" href="{% url 'appointments:create' %}">Schedule appointment</a><a class="btn btn-outline" href="{% url 'admissions:admit' %}">Admit patient</a></div></div>
+<div class="grid grid-4" style="margin-bottom:1.25rem">
+  <div class="stat"><div class="value">{{ today_appts|length }}</div><div class="label">Appointments today</div><div class="hint">{{ checked_in }} checked in</div></div>
+  <div class="stat warn"><div class="value">{{ pending_count }}</div><div class="label">Requests to confirm</div></div>
+  <div class="stat"><div class="value">{{ admitted }}</div><div class="label">Admitted patients</div></div>
+  <div class="stat good"><div class="value">{{ beds_free }}</div><div class="label">Beds free</div></div>
+</div>
+<div class="card"><div class="card-head"><h2>Today's appointments</h2></div>{% include 'appointments/_table.html' with rows=today_appts empty_text="No appointments today." %}</div>
+<div class="card"><div class="card-head"><h2>Patient requests awaiting confirmation</h2></div>{% include 'appointments/_table.html' with rows=pending show_date=True empty_text="No pending requests." %}</div>
+{% endblock %}

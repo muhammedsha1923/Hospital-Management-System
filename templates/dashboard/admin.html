@@ -1,0 +1,22 @@
+{% extends 'base.html' %}{% block title %}Administrator dashboard{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Hospital overview</h1><p class="muted">Welcome back, {{ user.display_name }}.</p></div>
+  <div class="quick"><a class="btn" href="{% url 'patients:create' %}">Register patient</a><a class="btn btn-outline" href="{% url 'appointments:create' %}">Schedule appointment</a><a class="btn btn-outline" href="{% url 'doctors:create' %}">Add doctor</a></div></div>
+<div class="grid grid-4" style="margin-bottom:1.25rem">
+  <div class="stat"><div class="value">{{ stats.patients }}</div><div class="label">Total patients</div></div>
+  <div class="stat"><div class="value">{{ stats.doctors }}</div><div class="label">Doctors</div></div>
+  <div class="stat"><div class="value">{{ stats.appointments }}</div><div class="label">Appointments</div><div class="hint">{{ stats.today_appts }} today</div></div>
+  <div class="stat"><div class="value">{{ stats.admitted }}</div><div class="label">Currently admitted</div><div class="hint">{{ stats.total_admissions }} admissions overall · {{ stats.beds_free }} of {{ stats.beds_total }} beds free</div></div>
+  <div class="stat good"><div class="value">{{ stats.revenue }}</div><div class="label">Revenue collected</div></div>
+  <div class="stat warn"><div class="value">{{ stats.unpaid }}</div><div class="label">Outstanding balance</div></div>
+</div>
+<div class="grid grid-2">
+  <div class="card"><div class="card-head"><h2>Revenue, last 6 months</h2></div>
+    <div class="bars" role="img" aria-label="Monthly revenue bar chart">{% for m in months %}<div class="bar" title="{{ m.total }}"><span class="fill" style="height:{{ m.pct }}%"></span><small>{{ m.label }}</small></div>{% endfor %}</div></div>
+  <div class="card"><div class="card-head"><h2>Recent bills</h2><a href="{% url 'billing:list' %}">All bills</a></div>
+    <div class="table-wrap"><table><tbody>{% for b in recent_bills %}<tr><td><a href="{% url 'billing:detail' b.pk %}">{{ b.invoice_number }}</a><div class="muted small">{{ b.patient.full_name }}</div></td><td class="num">{{ b.total }}</td><td><span class="badge badge-{{ b.status|lower }}">{{ b.get_status_display }}</span></td></tr>
+    {% empty %}<tr><td class="empty">No bills yet.</td></tr>{% endfor %}</tbody></table></div></div>
+</div>
+<div class="card"><div class="card-head"><h2>Recent appointments</h2><a href="{% url 'appointments:list' %}">All appointments</a></div>
+  {% include 'appointments/_table.html' with rows=recent_appts show_date=True %}</div>
+{% endblock %}

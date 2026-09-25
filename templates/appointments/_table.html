@@ -1,0 +1,16 @@
+{# rows: decorated appointments; show_date: bool #}
+<div class="table-wrap"><table>
+  <thead><tr>{% if show_date %}<th>Date</th>{% endif %}<th>Time</th><th>Patient</th><th>Doctor</th><th>Status</th><th>Actions</th></tr></thead>
+  <tbody>
+  {% for a in rows %}
+    <tr data-appt data-status="{{ a.status }}">
+      {% if show_date %}<td class="nowrap">{{ a.date|date:"d M Y" }}</td>{% endif %}
+      <td class="nowrap">{{ a.time|time:"H:i" }}</td>
+      <td>{% if user.role != 'PATIENT' %}<a href="{% url 'appointments:detail' a.pk %}">{{ a.patient.full_name }}</a>{% else %}<a href="{% url 'appointments:detail' a.pk %}">{{ a.reason|truncatechars:30 }}</a>{% endif %}</td>
+      <td>{{ a.doctor.full_name }}<div class="muted small">{{ a.department.name }}</div></td>
+      <td><span class="badge appt-badge badge-{{ a.status|lower }}">{{ a.get_status_display }}</span></td>
+      <td>{% include 'appointments/_actions_box.html' %}</td>
+    </tr>
+  {% empty %}<tr><td colspan="6" class="empty">{{ empty_text|default:"No appointments." }}</td></tr>{% endfor %}
+  </tbody>
+</table></div>
